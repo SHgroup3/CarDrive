@@ -7,9 +7,13 @@ const protect = (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "drivemotor_secret_key");
+      // CRITICAL FIX: No fallback string, strictly use process.env
+      if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ message: "JWT Secret is not configured in environment variables" });
+      }
 
-      req.user = decoded;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // Contains id and role
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -25,7 +29,7 @@ const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    return res.status(403).json({ message: "Access denied! Only Admin can perform this action." });
+    return res.status(403).json({ message: "Access denied! Admins only." });
   }
 };
 

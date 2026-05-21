@@ -2,11 +2,43 @@ const User = require("../models/userModel");
 const bcrypt = require("bcryptjs"); 
 const jwt = require("jsonwebtoken"); 
 
+exports.registerAdmin = async (req, res) => {
+  try {
+    const { name, email, password, adminSecret } = req.body;
+
+    if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
+      return res.status(403).json({ message: "Invalid Admin Secret Key! Access Denied." });
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: "Email already registered" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newAdmin = new User({ 
+      name, 
+      email, 
+      password_hash: hashedPassword,
+      role: "admin" 
+    });
+    
+    await newAdmin.save();
+
+    res.status(201).json({ 
+      message: "Admin registered successfully", 
+      user: { id: newAdmin._id, name, email, role: "admin" } 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password} = req.body;
 
+    const role = "customer";
 
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: "Email already registered" });
@@ -101,6 +133,31 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password_hash");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id, 
+      { name, email },
+      { new: true, runValidators: true }
+    ).select("-password_hash");
+
+    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

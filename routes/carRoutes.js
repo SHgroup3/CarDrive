@@ -10,6 +10,8 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
  *     summary: Add a new car with images(Admin Only)
  *     tags:
  *       - Cars
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -17,14 +19,11 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
  *           schema:
  *             type: object
  *             required:
- *               - added_by
  *               - make
  *               - model
  *               - year
  *               - price
  *             properties:
- *               added_by:
- *                 type: string
  *               make:
  *                 type: string
  *                 example: Toyota
@@ -89,6 +88,8 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
  *     summary: Update car specifications or status
  *     tags:
  *       - Cars
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -119,6 +120,8 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
  *     summary: Remove a car from inventory
  *     tags:
  *       - Cars
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -3,12 +3,13 @@ const CarImage = require("../models/carImage");
 
 exports.createCar = async (req, res) => {
   try {
+    const added_by = req.user.id;
     const { 
-      added_by, make, model, year, price, 
+      make, model, year, price, 
       color, fuel_type, mileage, transmission, status, images 
     } = req.body;
 
-    // Pehle Car insert karein
+   
     const newCar = new Car({
       added_by, make, model, year, price, 
       color, fuel_type, mileage, transmission, status

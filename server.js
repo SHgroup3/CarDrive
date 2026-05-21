@@ -5,9 +5,11 @@ const inquiryRoutes = require("./routes/inquiryRoutes");
 const connectDB = require('./config.js/db');
 require('dotenv').config();
 const { swaggerUi, specs } = require("./swagger");
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 connectDB();
